@@ -21,6 +21,8 @@ router.post('/chat-process', auth, async (req, res) => {
 
   try {
     const { prompt, options = {} } = req.body as { prompt: string; options?: ChatContext }
+    console.log('=========> on chat process', prompt, options)
+    console.info('=========> on chat process', prompt, options)
     let firstChunk = true
     await chatReplyProcess(prompt, options, (chat: ChatMessage) => {
       res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
