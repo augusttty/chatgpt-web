@@ -1,7 +1,9 @@
 import express from 'express'
 import type { ChatContext, ChatMessage } from './chatgpt'
-import { chatConfig, chatReplyProcess } from './chatgpt'
+import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
 import { auth } from './middleware/auth'
+import { limiter } from './middleware/limiter'
+import { isNotEmptyString } from './utils/is'
 
 const app = express()
 const router = express.Router()
@@ -16,13 +18,11 @@ app.all('*', (_, res, next) => {
   next()
 })
 
-router.post('/chat-process', auth, async (req, res) => {
+router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
   try {
     const { prompt, options = {} } = req.body as { prompt: string; options?: ChatContext }
-    console.log('=========> on chat process', prompt, options)
-    console.info('=========> on chat process', prompt, options)
     let firstChunk = true
     await chatReplyProcess(prompt, options, (chat: ChatMessage) => {
       res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
@@ -37,7 +37,7 @@ router.post('/chat-process', auth, async (req, res) => {
   }
 })
 
-router.post('/config', async (req, res) => {
+router.post('/config', auth, async (req, res) => {
   try {
     const response = await chatConfig()
     res.send(response)
@@ -50,8 +50,8 @@ router.post('/config', async (req, res) => {
 router.post('/session', async (req, res) => {
   try {
     const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY
-    const hasAuth = typeof AUTH_SECRET_KEY === 'string' && AUTH_SECRET_KEY.length > 0
-    res.send({ status: 'Success', message: '', data: { auth: hasAuth } })
+    const hasAuth = isNotEmptyString(AUTH_SECRET_KEY)
+    res.send({ status: 'Success', message: '', data: { auth: hasAuth, model: currentModel() } })
   }
   catch (error) {
     res.send({ status: 'Fail', message: error.message, data: null })
