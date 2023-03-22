@@ -14,8 +14,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          fingerprint: ${{ secrets.FINGERPRINT }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
           script: |
             docker pull anomanm/chatgpt-web
             cd docker/mygpt
