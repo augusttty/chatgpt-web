@@ -2,7 +2,7 @@ name: Deploy ChatGPT Web
 
 on:
   workflow_run:
-    workFlows: [build_docker]
+    workflows: [build_docker]
     types: [completed]
 
 jobs:
