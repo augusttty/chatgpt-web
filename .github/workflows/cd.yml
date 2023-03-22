@@ -1,13 +1,12 @@
 name: Deploy ChatGPT Web
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workFlows: [build_docker]
+    types: [completed]
 
 jobs:
-  deploy:
-    needs: build_docker
+  on-success:
     runs-on: ubuntu-latest
     steps:
       - name: Setup SSH
