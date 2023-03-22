@@ -11,9 +11,10 @@ jobs:
     steps:
 
       - name: Setup SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v0.1.8
         with:
           host: 159.75.229.92
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             docker pull anomanm/chatgpt-web
