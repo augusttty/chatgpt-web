@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    needs: [build_docker]
     runs-on: ubuntu-latest
     steps:
 
@@ -15,7 +16,7 @@ jobs:
         with:
           host: 159.75.229.92
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          fingerprint: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             docker pull anomanm/chatgpt-web
             cd docker/mygpt
