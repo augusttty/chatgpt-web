@@ -9,18 +9,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.0
+        uses: appleboy/ssh-action@master
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: SSH to server and pull image
-        run: |
-          ssh ubuntu@159.75.229.92 'docker pull anomanm/chatgpt-web'
-
-      - name: SSH to server and start Docker container
-        run: |
-          ssh ubuntu@159.75.229.92 'cd docker/mygpt && docker-compose down && docker-compose up -d'
+          host: 159.75.229.92
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull anomanm/chatgpt-web
+            cd docker/mygpt
+            docker-compose down
+            docker-compose up -d
