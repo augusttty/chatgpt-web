@@ -133,7 +133,6 @@ async function fetchUsage() {
 
   // 每月使用量
   const urlUsage = `${API_BASE_URL}/v1/dashboard/billing/usage?start_date=${startDate}&end_date=${endDate}`
-
   const headers = {
     'Authorization': `Bearer ${OPENAI_API_KEY}`,
     'Content-Type': 'application/json',
@@ -146,10 +145,11 @@ async function fetchUsage() {
   try {
     // 获取已使用量
     const useResponse = await options.fetch(urlUsage, { headers })
+    // eslint-ignore
     if (!useResponse.ok)
       throw new Error('获取使用量失败')
     const usageData = await useResponse.json() as UsageResponse
-    const usage = Math.round(usageData.total_usage) / 100
+    const usage = usageData.total_usage
     return Promise.resolve(usage ? `$${usage}` : '-')
   }
   catch (error) {
