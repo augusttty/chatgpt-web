@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 interface SendResponseOptions<T = any> {
   type: 'Success' | 'Fail'
   message?: string
@@ -19,4 +20,8 @@ export function sendResponse<T>(options: SendResponseOptions<T>) {
     data: options.data ?? null,
     status: options.type,
   })
+}
+
+export function createUserId() {
+  return crypto.randomBytes(6).toString('hex')
 }

@@ -8,6 +8,9 @@ import Icon403 from '@/icons/403.vue'
 interface Props {
   visible: boolean
 }
+interface VerifyResponse {
+  userId: string
+}
 
 defineProps<Props>()
 
@@ -28,7 +31,8 @@ async function handleVerify() {
 
   try {
     loading.value = true
-    await fetchVerify(secretKey)
+    const { data } = await fetchVerify<VerifyResponse>(secretKey)
+    authStore.setUserId(data.userId)
     authStore.setToken(secretKey)
     ms.success('success')
     window.location.reload()
@@ -36,6 +40,7 @@ async function handleVerify() {
   catch (error: any) {
     ms.error(error.message ?? 'error')
     authStore.removeToken()
+    authStore.removeUserId()
     token.value = ''
   }
   finally {

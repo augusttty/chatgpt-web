@@ -13,3 +13,15 @@ export function setToken(token: string) {
 export function removeToken() {
   return ss.remove(LOCAL_NAME)
 }
+
+export function setUserId(userId: string) {
+  return ss.set('userId', userId)
+}
+
+export function getUserId() {
+  return ss.get('userId')
+}
+
+export function removeUserId() {
+  return ss.remove('userId')
+}
