@@ -10,7 +10,10 @@ const auth = async (req, res, next) => {
       const bear = Authorization.replace('Bearer ', '').trim()
       const isInvalidAuth = bear !== AUTH_SECRET_KEY.trim()
       const isInvalidAdmin = bear !== ADMIN_SECRET_KEY.trim()
-      if (!Authorization || (isInvalidAuth && isInvalidAdmin))
+      if (!Authorization)
+        throw new Error('Error: 无访问权限 | No access rights')
+
+      if (isInvalidAuth && isInvalidAdmin)
         throw new Error('Error: 无访问权限 | No access rights')
 
       // if (!Authorization || ( (bear  !== AUTH_SECRET_KEY.trim() ) && ( bear !== ADMIN_SECRET_KEY.trim())))

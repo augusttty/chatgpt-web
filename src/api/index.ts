@@ -1,7 +1,6 @@
 import type { AxiosProgressEvent, GenericAbortSignal } from 'axios'
 import { post } from '@/utils/request'
 import { useAuthStore, useChatStore, useSettingStore } from '@/store'
-import { createUserId } from '@/utils/functions/createUserId'
 
 export function fetchChatAPI<T = any>(
   prompt: string,
@@ -32,8 +31,6 @@ export function fetchChatAPIProcess<T = any>(
   const uuid = chatStore.active
   const settingStore = useSettingStore()
   const authStore = useAuthStore()
-  if (!authStore.userId)
-    authStore.setUserId(createUserId())
 
   let data: Record<string, any> = {
     prompt: params.prompt,

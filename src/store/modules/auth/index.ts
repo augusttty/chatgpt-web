@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { getToken, getUserId, removeToken, removeUserId, setToken, setUserId } from './helper'
 import { store } from '@/store'
 import { fetchSession } from '@/api'
-import { createUserId } from '@/utils/functions/createUserId'
 
 interface SessionResponse {
   auth: boolean
@@ -33,10 +32,6 @@ export const useAuthStore = defineStore('auth-store', {
       try {
         const { data } = await fetchSession<SessionResponse>()
         this.session = { ...data }
-        if (!this.userId) {
-          this.userId = createUserId()
-          setUserId(this.userId)
-        }
         return Promise.resolve(data)
       }
       catch (error) {

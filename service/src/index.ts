@@ -32,6 +32,10 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   let chatReply = null
   try {
     const { prompt, options = {}, systemMessage, temperature, top_p, userId, uuid } = req.body as RequestProps
+    if (!userId)
+      throw new Error('userId is required')
+    if (!uuid)
+      throw new Error('uuid is required')
     const currentModelType = currentModel()
     const mongoServiceEnabled = mongoService.enabled
     let firstChunk = true

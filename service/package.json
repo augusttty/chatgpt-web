@@ -24,7 +24,6 @@
     "common:cleanup": "rimraf node_modules && rimraf pnpm-lock.yaml"
   },
   "dependencies": {
-    "@types/mongoose": "^5.11.97",
     "axios": "^1.3.4",
     "chatgpt": "^5.1.2",
     "dotenv": "^16.0.3",
