@@ -40,15 +40,12 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     const mongoServiceEnabled = mongoService.enabled
     let firstChunk = true
     if (mongoServiceEnabled) {
-      const nowTime = new Date().getTime() / 1000
-      const now = parseInt(`${nowTime}`)
       const chatDataUser = {
         role: 'user',
         userId,
         uuid,
         requestOptions: options,
         text: prompt,
-        created: now,
         modelType: currentModelType,
       }
       mongoService.insertChat(chatDataUser)
@@ -77,7 +74,6 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         uuid,
         requestOptions: options,
         text: chatReply.text,
-        created: chatReply.detail.created,
         modelType: currentModelType,
         model: chatReply.detail.model,
         msgId: chatReply.id,
