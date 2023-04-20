@@ -22,14 +22,9 @@ class MongoService {
     await cat.save()
   }
 
-  insertChat(data: any) {
-    try {
-      const chat = new ChatModel(data)
-      chat.save()
-    }
-    catch (error) {
-      globalThis.console.log('insertChat error:', error)
-    }
+  async insertChat(data: any) {
+    const chat = new ChatModel(data)
+    await chat.save()
   }
 }
 

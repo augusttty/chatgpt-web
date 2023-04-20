@@ -48,7 +48,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         text: prompt,
         modelType: currentModelType,
       }
-      mongoService.insertChat(chatDataUser)
+      await mongoService.insertChat(chatDataUser)
     }
 
     // if(mongoService.enabled){
@@ -78,7 +78,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         model: chatReply.detail.model,
         msgId: chatReply.id,
       }
-      mongoService.insertChat(chatData)
+      await mongoService.insertChat(chatData)
     }
   }
   catch (error) {
