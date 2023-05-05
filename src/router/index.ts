@@ -18,7 +18,11 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
-
+  {
+    path: '/mindmap',
+    name: 'Mindmap',
+    component: () => import('@/views/mindmap/index.vue'),
+  },
   {
     path: '/404',
     name: '404',
