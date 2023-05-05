@@ -5,14 +5,14 @@ import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NInput, useDialog, useMessage } from 'naive-ui'
 import html2canvas from 'html2canvas'
-import { Message } from './components'
 import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useUsingContext } from './hooks/useUsingContext'
 import HeaderComponent from './components/Header/index.vue'
+import MarkmapComponent from './components/Markmap/index.vue'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useChatStore, usePromptStore } from '@/store'
+import { useAppStore, useChatStore, usePromptStore } from '@/store'
 import { fetchChatAPIProcess } from '@/api'
 import { t } from '@/locales'
 
@@ -25,10 +25,10 @@ const dialog = useDialog()
 const ms = useMessage()
 
 const chatStore = useChatStore()
-
+const appStore = useAppStore()
 const { isMobile } = useBasicLayout()
 const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } = useChat()
-const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
+const { scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
 const { usingContext, toggleUsingContext } = useUsingContext()
 
 const { uuid } = route.params as { uuid: string }
@@ -39,6 +39,13 @@ const conversationList = computed(() => dataSources.value.filter(item => (!item.
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
+// `# markmap
+// - beautiful
+// - useful
+// - easy
+// - interactive
+// `
+const markmapValue = ref<string []>([])
 
 // 添加PromptStore
 const promptStore = usePromptStore()
@@ -53,6 +60,8 @@ dataSources.value.forEach((item, index) => {
 })
 
 function handleSubmit() {
+  markmapValue.value = []
+  appStore.setSiderCollapsed(true)
   onConversation()
 }
 
@@ -65,6 +74,8 @@ async function onConversation() {
   if (!message || message.trim() === '')
     return
 
+  const systemPrompt = '你将根据用户提示使用markdown生成高质量、详细的、多层级、多分支、清晰的指引,并直接返回结果（无开头）。提示: \n'
+  message = systemPrompt + message
   controller = new AbortController()
 
   addChat(
@@ -121,6 +132,10 @@ async function onConversation() {
           try {
             const data = JSON.parse(chunk)
             const textRes = lastText + (data.text ?? '')
+            // markmapValue.value = textRes /only if newLine, then pass to markmapValue
+            const textResArray = textRes.split('\n')
+            if (markmapValue.value.length !== textResArray.length)
+              markmapValue.value = textResArray
             updateChat(
               +uuid,
               dataSources.value.length - 1,
@@ -204,117 +219,6 @@ async function onConversation() {
   }
 }
 
-async function onRegenerate(index: number) {
-  if (loading.value)
-    return
-
-  controller = new AbortController()
-
-  const { requestOptions } = dataSources.value[index]
-
-  let message = requestOptions?.prompt ?? ''
-
-  let options: Chat.ConversationRequest = {}
-
-  if (requestOptions.options)
-    options = { ...requestOptions.options }
-
-  loading.value = true
-
-  updateChat(
-    +uuid,
-    index,
-    {
-      dateTime: new Date().toLocaleString(),
-      text: '',
-      inversion: false,
-      error: false,
-      loading: true,
-      conversationOptions: null,
-      requestOptions: { prompt: message, options: { ...options } },
-    },
-  )
-
-  try {
-    let lastText = ''
-    const fetchChatAPIOnce = async () => {
-      await fetchChatAPIProcess<Chat.ConversationResponse>({
-        prompt: message,
-        options,
-        signal: controller.signal,
-        onDownloadProgress: ({ event }) => {
-          const xhr = event.target
-          const { responseText } = xhr
-          // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
-          let chunk = responseText
-          if (lastIndex !== -1)
-            chunk = responseText.substring(lastIndex)
-          try {
-            const data = JSON.parse(chunk)
-            updateChat(
-              +uuid,
-              index,
-              {
-                dateTime: new Date().toLocaleString(),
-                text: lastText + (data.text ?? ''),
-                inversion: false,
-                error: false,
-                loading: true,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-                requestOptions: { prompt: message, options: { ...options } },
-              },
-            )
-
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
-              options.parentMessageId = data.id
-              lastText = data.text
-              message = ''
-              return fetchChatAPIOnce()
-            }
-          }
-          catch (error) {
-            //
-          }
-        },
-      })
-      updateChatSome(+uuid, index, { loading: false })
-    }
-    await fetchChatAPIOnce()
-  }
-  catch (error: any) {
-    if (error.message === 'canceled') {
-      updateChatSome(
-        +uuid,
-        index,
-        {
-          loading: false,
-        },
-      )
-      return
-    }
-
-    const errorMessage = error?.message ?? t('common.wrong')
-
-    updateChat(
-      +uuid,
-      index,
-      {
-        dateTime: new Date().toLocaleString(),
-        text: errorMessage,
-        inversion: false,
-        error: true,
-        loading: false,
-        conversationOptions: null,
-        requestOptions: { prompt: message, options: { ...options } },
-      },
-    )
-  }
-  finally {
-    loading.value = false
-  }
-}
-
 function handleExport() {
   if (loading.value)
     return
@@ -353,21 +257,6 @@ function handleExport() {
       finally {
         d.loading = false
       }
-    },
-  })
-}
-
-function handleDelete(index: number) {
-  if (loading.value)
-    return
-
-  dialog.warning({
-    title: t('chat.deleteMessage'),
-    content: t('chat.deleteMessageConfirm'),
-    positiveText: t('common.yes'),
-    negativeText: t('common.no'),
-    onPositiveClick: () => {
-      chatStore.deleteChatByUuid(+uuid, index)
     },
   })
 }
@@ -473,43 +362,11 @@ onUnmounted(() => {
       @toggle-using-context="toggleUsingContext"
     />
     <main class="flex-1 overflow-hidden">
-      <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto">
-        <div
-          id="image-wrapper"
-          class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
-          :class="[isMobile ? 'p-2' : 'p-4']"
-        >
-          <template v-if="!dataSources.length">
-            <div class="flex items-center justify-center mt-4 text-center text-neutral-300">
-              <SvgIcon icon="ri:bubble-chart-fill" class="mr-2 text-3xl" />
-              <span>Aha~</span>
-            </div>
-          </template>
-          <template v-else>
-            <div>
-              <Message
-                v-for="(item, index) of dataSources"
-                :key="index"
-                :date-time="item.dateTime"
-                :text="item.text"
-                :inversion="item.inversion"
-                :error="item.error"
-                :loading="item.loading"
-                @regenerate="onRegenerate(index)"
-                @delete="handleDelete(index)"
-              />
-              <div class="sticky bottom-0 left-0 flex justify-center">
-                <NButton v-if="loading" type="warning" @click="handleStop">
-                  <template #icon>
-                    <SvgIcon icon="ri:stop-circle-line" />
-                  </template>
-                  Stop Responding
-                </NButton>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
+      <MarkmapComponent
+        class="h-full w-full overflow-hidden overflow-y-auto max-w-screen-xl m-auto dark:bg-[#101014]"
+        :class="[isMobile ? 'p-2' : 'p-4']"
+        :value="markmapValue"
+      />
     </main>
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">

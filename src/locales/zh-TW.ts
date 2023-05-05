@@ -75,6 +75,8 @@ export default {
   },
   store: {
     siderButton: '提示詞商店',
+    chatMode: '思维导图模式',
+    mindMode: '对话模式',
     local: '本機',
     online: '線上',
     title: '標題',

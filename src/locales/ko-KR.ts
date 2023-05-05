@@ -75,6 +75,8 @@ export default {
   },
   store: {
     siderButton: '프롬프트 저장소',
+    chatMode: '思维导图模式',
+    mindMode: '对话模式',
     local: '로컬',
     online: '온라인',
     title: '제목',

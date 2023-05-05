@@ -75,6 +75,8 @@ export default {
   },
   store: {
     siderButton: 'Prompt Store',
+    chatMode: '思维导图模式',
+    mindMode: '对话模式',
     local: 'Local',
     online: 'Online',
     title: 'Title',

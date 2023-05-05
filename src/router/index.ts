@@ -16,12 +16,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Chat',
         component: () => import('@/views/chat/index.vue'),
       },
+      {
+        path: '/mindmap/:uuid?',
+        name: 'Mindmap',
+        component: () => import('@/views/chat/mindMap.vue'),
+      },
     ],
-  },
-  {
-    path: '/mindmap',
-    name: 'Mindmap',
-    component: () => import('@/views/mindmap/index.vue'),
   },
   {
     path: '/404',

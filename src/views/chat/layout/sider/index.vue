@@ -2,7 +2,9 @@
 import type { CSSProperties } from 'vue'
 import { computed, ref, watch } from 'vue'
 import { NButton, NLayoutSider } from 'naive-ui'
+import { useRoute } from 'vue-router'
 import List from './List.vue'
+import MindList from './MindList.vue'
 import Footer from './Footer.vue'
 import { useAppStore, useChatStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
@@ -15,7 +17,7 @@ const { isMobile } = useBasicLayout()
 const show = ref(false)
 
 const collapsed = computed(() => appStore.siderCollapsed)
-
+const route = useRoute()
 function handleAdd() {
   chatStore.addHistory({ title: 'New Chat', uuid: Date.now(), isEdit: false })
   if (isMobile.value)
@@ -34,6 +36,12 @@ const getMobileClass = computed<CSSProperties>(() => {
     }
   }
   return {}
+})
+const listView = computed(() => {
+  if (route.name === 'Mindmap')
+    return MindList
+  else
+    return List
 })
 
 const mobileSafeArea = computed(() => {
@@ -77,11 +85,17 @@ watch(
           </NButton>
         </div>
         <div class="flex-1 min-h-0 pb-4 overflow-hidden">
-          <List />
+          <!-- <List /> -->
+          <component :is="listView" />
         </div>
         <div class="p-4">
           <NButton block @click="show = true">
             {{ $t('store.siderButton') }}
+          </NButton>
+        </div>
+        <div class="p-4">
+          <NButton block @click="$router.push($route.name === 'Mindmap' ? '/chat' : '/mindmap')">
+            切换到:{{ $t($route.name === 'Mindmap' ? 'store.mindMode' : 'store.chatMode') }}
           </NButton>
         </div>
       </main>

@@ -75,6 +75,8 @@ export default {
   },
   store: {
     siderButton: 'Хранилище подсказок',
+    chatMode: '思维导图模式',
+    mindMode: '对话模式',
     local: 'Локальное',
     online: 'Онлайн',
     title: 'Название',
