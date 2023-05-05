@@ -74,7 +74,7 @@ async function onConversation() {
   if (!message || message.trim() === '')
     return
 
-  const systemPrompt = '你将根据用户提示使用markdown生成高质量、详细的、多层级、多分支、清晰的指引,并直接返回结果（无开头）。提示: \n'
+  const systemPrompt = 'You will generate high-quality, detailed, multi-level headings(up to six), multi-branched, clear guides using markdown (markmap syntax), based on user prompts, and return the results directly (no beginning). prompt: \n'
   message = systemPrompt + message
   controller = new AbortController()
 
